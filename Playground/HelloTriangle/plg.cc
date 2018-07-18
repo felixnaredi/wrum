@@ -1,3 +1,9 @@
+// plg.cc
+//
+// Author: Felix Naredi
+// Date: 2018-07-18 18:30:19 +0200
+//
+
 #include <stdexcept>
 #include <sstream>
 

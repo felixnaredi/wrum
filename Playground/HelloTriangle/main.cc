@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 	Vertex { {  0.0,  0.8 }, { 0, 1, 0 } },
 	Vertex { {  0.8, -0.8 }, { 0, 0, 1 } }
     });    
-    /* init program with shaders */
+
     wrum::Shader<GL_VERTEX_SHADER> vxt_sh;
     vxt_sh.compile(
 	"#version 130\n"

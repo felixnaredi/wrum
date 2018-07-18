@@ -5,7 +5,7 @@
 #
 
 cmake_minimum_required(VERSION 2.8.9)
-project(just-tetris-playground-03)
+project(hello-triangle)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
