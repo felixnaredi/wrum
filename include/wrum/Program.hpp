@@ -7,42 +7,68 @@
 #ifndef wrum_Program_hpp
 #define wrum_Program_hpp
 
+#include <atomic>
+
 #include "Prim.hpp"
+#include "GPURef.hpp"
 #include "Shader.hpp"
+#include "Exception.hpp"
 
 namespace wrum
 {
     class Program
-    {
-	// (!) IMPLEMENT
-	// -----------------------------------------------------
-	// Thread safe copy that frees the program from the GPU when no
-	// object has an GPU reference to it.
-	//
-
-	// (!) IMPLEMENT
-	// -----------------------------------------------------
-	// Error handling for the link function.
-	//
-	
-	const UInt gpu_ref_;
+    {	
+	const GPURef gpu_ref_;
+	std::atomic_bool used_;
 
 	static auto gen() noexcept { return glCreateProgram(); }
+
+	auto get_iv(GLenum iv) const noexcept
+	{
+	    Int r;
+	    glGetProgramiv(gpu_ref_, iv, &r);
+	    return r;
+	}
     public:
-	Program() : gpu_ref_(gen()) { }
+	Program() noexcept : gpu_ref_(gen()), used_(false) { }
+	~Program() noexcept { glDeleteProgram(gpu_ref_); }
 
 	constexpr auto ref() const noexcept { return gpu_ref_; }
+	auto is_used() const noexcept { return used_.load(); }	
+	
+	void use() noexcept
+	{
+	    if(used_.load()) { return; }
+	    glUseProgram(gpu_ref_);
+	    used_.store(true);
+	}
+	
+	void unuse() noexcept
+	{
+	    if(used_.load() == false) { return; }
+	    glUseProgram(0);
+	    used_.store(false);
+	}
 
-	void use() const noexcept { glUseProgram(gpu_ref_); }
-	void unuse() const noexcept { glUseProgram(0); }
+	auto log() const noexcept
+	{
+	    auto len = get_iv(GL_INFO_LOG_LENGTH);
+	    const auto& ref = gpu_ref_;
+	    return Log(
+		len,
+		[&ref, len](auto& s) {
+		    glGetProgramInfoLog(ref, len, nullptr, s.data());
+		});
+	}
 
 	template<GLenum ...Type>
-	void link(Shader<Type> ...shs) const
+	void link(const Shader<Type>& ...shs) const
 	{
-	    auto dummy0 = { (glAttachShader(gpu_ref_, shs.ref()), 0)... };
-	    glLinkProgram(gpu_ref_);	    
-	    /* validate */
-	    auto dummy1 = { (glDetachShader(gpu_ref_, shs.ref()), 0)... };
+	    auto __dmy0 = { (glAttachShader(gpu_ref_, shs.ref()), 0)... };
+	    glLinkProgram(gpu_ref_);	    	    
+	    auto __dmy1 = { (glDetachShader(gpu_ref_, shs.ref()), 0)... };
+
+	    if(get_iv(GL_LINK_STATUS) == GL_FALSE) { throw Exception(); }
 	}
     };
 }
