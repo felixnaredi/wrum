@@ -18,22 +18,23 @@ namespace wrum
 {
     class Program
     {	
-	const GPURef gpu_ref_;
-	std::atomic_bool used_;
-
-	static auto gen() noexcept { return glCreateProgram(); }
-
-	auto get_iv(GLenum iv) const noexcept
-	{
-	    Int r;
-	    glGetProgramiv(gpu_ref_, iv, &r);
-	    return r;
-	}
+	GPURef<Program> gpu_ref_;
+	std::atomic_bool used_;	
     public:
-	Program() noexcept : gpu_ref_(gen()), used_(false) { }
-	~Program() noexcept { glDeleteProgram(gpu_ref_); }
+	static auto create_gpu_ref() noexcept
+	{ return glCreateProgram(); }
+	
+	static void release_gpu_ref(const GPURef<Program>& ref) noexcept
+	{ glDeleteProgram(ref); }
+	
+	Program() noexcept : used_(false) { }
+	
+	Program(Program&& other) noexcept
+	    : gpu_ref_(std::move(other.gpu_ref_)),
+	      used_(other.used_.load())
+	{ }
 
-	constexpr auto ref() const noexcept { return gpu_ref_; }
+	constexpr const auto& ref() const noexcept { return gpu_ref_; }
 	auto is_used() const noexcept { return used_.load(); }	
 	
 	void use() noexcept
@@ -50,6 +51,13 @@ namespace wrum
 	    used_.store(false);
 	}
 
+	auto get_iv(GLenum iv) const noexcept
+	{
+	    Int r;
+	    glGetProgramiv(gpu_ref_, iv, &r);
+	    return r;
+	}
+
 	auto log() const noexcept
 	{
 	    auto len = get_iv(GL_INFO_LOG_LENGTH);
@@ -59,16 +67,6 @@ namespace wrum
 		[&ref, len](auto& s) {
 		    glGetProgramInfoLog(ref, len, nullptr, s.data());
 		});
-	}
-
-	template<GLenum ...Type>
-	void link(const Shader<Type>& ...shs) const
-	{
-	    auto __dmy0 = { (glAttachShader(gpu_ref_, shs.ref()), 0)... };
-	    glLinkProgram(gpu_ref_);	    	    
-	    auto __dmy1 = { (glDetachShader(gpu_ref_, shs.ref()), 0)... };
-
-	    if(get_iv(GL_LINK_STATUS) == GL_FALSE) { throw Exception(); }
 	}
     };
 }

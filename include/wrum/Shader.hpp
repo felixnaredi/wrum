@@ -15,32 +15,32 @@
 
 namespace wrum
 {    
-    template <Option Type>
     class Shader
     {	
-	static_assert(
-	    Type == GL_VERTEX_SHADER ||
-	    Type == GL_FRAGMENT_SHADER);
+	GPURef<Shader> gpu_ref_;
 
-	const GPURef gpu_ref_;
-
-	constexpr static auto gen() { return glCreateShader(Type); }
-
-	auto get_iv(Option iv) const noexcept
+	auto get_iv(GLenum iv) const noexcept
 	{
 	    Int v;
 	    glGetShaderiv(gpu_ref_, iv, &v);
 	    return v;
 	}	
     public:
-	constexpr Shader() noexcept : gpu_ref_(gen()) { }
-	~Shader() noexcept
-	{
-	    glDeleteShader(gpu_ref_);
-	}
+	static void release_gpu_ref(const GPURef<Shader>& ref) noexcept
+	{ glDeleteShader(ref); }
+	
+	static auto create_gpu_ref(GLenum type) noexcept
+	{ return glCreateShader(type); }
+	
+	Shader(GLenum type) noexcept : gpu_ref_(type) { }
 
-	constexpr auto ref() const noexcept { return gpu_ref_; }
-	constexpr auto log() const noexcept
+	constexpr Shader(Shader&& other) noexcept
+	    : gpu_ref_(std::move(other.gpu_ref_))
+	{ }
+
+	constexpr const auto& ref() const noexcept { return gpu_ref_; }
+	
+	auto log() const noexcept
 	{
 	    auto len = get_iv(GL_INFO_LOG_LENGTH);
 	    auto& ref = gpu_ref_;
@@ -50,21 +50,7 @@ namespace wrum
 		    glGetShaderInfoLog(ref, len, nullptr, s.data());
 		});
 	}
-	
-	void compile(const char* src) const
-	{
-	    int len = std::strlen(src);
-	    glShaderSource(gpu_ref_, 1, &src, &len);
-	    glCompileShader(gpu_ref_);
-	    
-	    if(get_iv(GL_COMPILE_STATUS) == GL_FALSE) {
-		throw Exception();
-	    }
-	}
     };
-
-    using VertexShader = Shader<GL_VERTEX_SHADER>;
-    using FragmentShader = Shader<GL_FRAGMENT_SHADER>;    
 }
 
 #endif /* wrum_Shader_hpp */

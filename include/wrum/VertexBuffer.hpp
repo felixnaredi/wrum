@@ -25,24 +25,18 @@ namespace wrum
 
     template <Memory::OptionT MemoryOption, typename ...Fields>
     class VertexBuffer<MemoryOption, std::tuple<Fields...>>
-    {
+    {	
 	using Tuple = std::tuple<Fields...>;
+	using Self = VertexBuffer<MemoryOption, Tuple>;
 
 	const static auto buf_t = GL_ARRAY_BUFFER;
 	const static auto field_count_ = sizeof...(Fields);
 
 	template <typename Lambda, std::size_t ...Is>
-    	constexpr static auto map_indicies(Lambda l, std::index_sequence<Is...>)
+    	constexpr static auto map_indicies(const Lambda& l, std::index_sequence<Is...>)
     	{ return std::array<Vertex, sizeof...(Is)>{ l(Is)... }; }
 
-	static auto gen() noexcept
-    	{
-    	    UInt id;
-    	    glGenBuffers(1, &id);
-    	    return id;
-    	}
-
-	const GPURef gpu_ref_;
+	const GPURef<Self> gpu_ref_;
 	std::atomic_bool bound_;
 	Tuple fields_;	
 
@@ -69,14 +63,21 @@ namespace wrum
 
     public:
 	using Vertex = std::tuple<typename Fields::Attrib...>;
+
+	static auto create_gpu_ref() noexcept
+    	{
+    	    UInt id;
+    	    glGenBuffers(1, &id);
+    	    return id;
+    	}
+
+	static auto release_gpu_ref(const GPURef<Self>& ref) noexcept
+	{ glDeleteBuffers(1, ref); }
 	
 	constexpr VertexBuffer(Tuple fields) noexcept
 	    : fields_(fields),
-	      gpu_ref_(gen()),
 	      bound_(false)
-	{ }
-
-	~VertexBuffer() noexcept { glDeleteBuffers(1, gpu_ref_); }
+	{ }	
 
 	void locate_fields(const Program& prg)
 	{ locate_fields(prg, std::make_index_sequence<field_count_>()); }
@@ -91,11 +92,14 @@ namespace wrum
     	}
 
 	template <std::size_t N, typename Lambda>
-    	void encode(Lambda l)
+    	constexpr void encode(const Lambda& l)
     	{
     	    encode(std::forward<std::array<Vertex, N>>(
     		map_indicies(l, std::make_index_sequence<N>())));
     	}
+
+	template <std::size_t N, typename Lambda>
+	constexpr void encode(Lambda&& l) { encode<N>(l); }
     private:
 	
 	template <std::size_t I, class Field>

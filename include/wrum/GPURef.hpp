@@ -11,12 +11,28 @@
 
 namespace wrum
 {
+    template <typename T>
     class GPURef
     {
-	const UInt gid_;	
+	const UInt gid_;
+	bool moved_;
     public:
-	constexpr GPURef(UInt gid) noexcept : gid_(gid) { }
-	constexpr GPURef(const GPURef&& r) noexcept : GPURef(r.gid_) { }
+	template <typename ...Args>
+	constexpr GPURef(Args ...args) noexcept
+	    : gid_(T::create_gpu_ref(args...)),
+	      moved_(false)
+	{ }
+	constexpr GPURef(GPURef&& other) noexcept
+	    : gid_(other.gid_),
+	      moved_(false)
+	{ other.moved_ = true; }
+
+	~GPURef()
+	{
+	    if(moved_) { return; }
+	    T::release_gpu_ref(*this);
+	}
+	
 	GPURef(GPURef& r) = delete;	
 
 	constexpr operator UInt() const { return gid_; }
