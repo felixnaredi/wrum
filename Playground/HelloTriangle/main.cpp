@@ -30,8 +30,8 @@ int main(int argc, char** argv)
 	std::cerr << e.what() << "\n";
 	return 1;
     }
-
-    auto vb = wrum::makeVertexBuffer<wrum::Memory::Static>(
+    
+    auto vb = wrum::makeVertexBuffer<wrum::BufferMemory::Static>(
 	wrum::LabelField<wrum::Attrib::Float2>("vPosition"),
 	wrum::LabelField<wrum::Attrib::Float3>("vColor"));	
     
@@ -86,7 +86,7 @@ int main(int argc, char** argv)
     
     prg.use();    
     vb.locate_fields(prg);
-    vb.use();
+    vb.bind();
 
     glClearColor(0.1, 0.2, 0.2, 1.0);
     

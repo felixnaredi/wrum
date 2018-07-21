@@ -18,14 +18,36 @@ namespace wrum
     using Float = GLfloat;
     using Option = GLenum;
 
+    enum class BufferMemory
+    {
+	Stream = GL_STREAM_DRAW,
+	Dynamic = GL_DYNAMIC_DRAW,
+	Static = GL_STATIC_DRAW,
+    };
+    
     struct Memory
-    {	
+    {
+	using Option = GLenum;
+	
 	const static auto Stream = GL_STREAM_DRAW;
 	const static auto Dynamic = GL_DYNAMIC_DRAW;
-	const static auto Static = GL_STATIC_DRAW;
-
-	using OptionT = decltype(Stream);
+	const static auto Static = GL_STATIC_DRAW;	
     };
+
+    template <typename Prim>
+    struct TypeOption { };
+
+    template <>
+    struct TypeOption<Byte> { const static auto value = GL_BYTE; };
+    template <>
+    struct TypeOption<UByte> { const static auto value = GL_UNSIGNED_BYTE; };
+    template <>
+    struct TypeOption<Int> { const static auto value = GL_INT; };
+    template <>
+    struct TypeOption<UInt> { const static auto value = GL_UNSIGNED_INT; };
+    template <>
+    struct TypeOption<Float> { const static auto value = GL_FLOAT; };
+
 }
 
 #endif /* wrum_Prim_hpp */

@@ -7,101 +7,56 @@
 #ifndef wrum_VertexBuffer_hpp
 #define wrum_VertexBuffer_hpp
 
-#include <cstdint>
 #include <tuple>
-#include <atomic>
-
-#include <GL/glew.h>
+#include <array>
 
 #include "Prim.hpp"
-#include "GPURef.hpp"
+#include "Buffer.hpp"
 #include "Program.hpp"
 
 namespace wrum
 {
-    template <Memory::OptionT MemoryOption, typename Fields>
-    struct VertexBuffer    
-    { };
-
-    template <Memory::OptionT MemoryOption, typename ...Fields>
-    class VertexBuffer<MemoryOption, std::tuple<Fields...>>
-    {	
+    template <BufferMemory Memory, typename ...Fields>
+    class VertexBuffer
+    {
+	using Self = VertexBuffer<Memory, Fields...>;
 	using Tuple = std::tuple<Fields...>;
-	using Self = VertexBuffer<MemoryOption, Tuple>;
 
-	const static auto buf_t = GL_ARRAY_BUFFER;
 	const static auto field_count_ = sizeof...(Fields);
 
-	template <typename Lambda, std::size_t ...Is>
-    	constexpr static auto map_indicies(const Lambda& l, std::index_sequence<Is...>)
-    	{ return std::array<Vertex, sizeof...(Is)>{ l(Is)... }; }
-
-	const GPURef<Self> gpu_ref_;
-	std::atomic_bool bound_;
+	Buffer<Memory, GL_ARRAY_BUFFER> buf_;
 	Tuple fields_;	
-
-	constexpr void bind() noexcept
-	{
-	    if(bound_.load()) { return; }
-	    glBindBuffer(buf_t, gpu_ref_);
-	    bound_.store(true);
-	}
-	
-    	constexpr void unbind() noexcept
-	{
-	    if(bound_.load() == false) { return; }
-	    glBindBuffer(buf_t, 0);
-	    bound_.store(false);
-	}
 
 	template <std::size_t ...Is>
 	constexpr void locate_fields(
 	    const Program& prg,
 	    std::index_sequence<Is...>)
 	noexcept	
-	{ auto __dmy = { (std::get<Is>(fields_).locate(prg), 0)... }; }
-
-    public:
+	{ auto dmy0 = { (std::get<Is>(fields_).locate(prg), 0)... }; }
+	
+    public:	
 	using Vertex = std::tuple<typename Fields::Attrib...>;
-
-	static auto create_gpu_ref() noexcept
-    	{
-    	    UInt id;
-    	    glGenBuffers(1, &id);
-    	    return id;
-    	}
-
-	static auto release_gpu_ref(const GPURef<Self>& ref) noexcept
-	{ glDeleteBuffers(1, ref); }
 	
 	constexpr VertexBuffer(Tuple fields) noexcept
-	    : fields_(fields),
-	      bound_(false)
-	{ }	
+	    : fields_(fields)
+	{ }
 
-	void locate_fields(const Program& prg)
+	constexpr VertexBuffer(Self&& vb) noexcept
+	: buf_(std::move(vb.buf_)),
+	    fields_(std::move(vb.fields_))
+	    { }
+
+	constexpr void locate_fields(const Program& prg)
 	{ locate_fields(prg, std::make_index_sequence<field_count_>()); }
-
 		
 	template <std::size_t N>
-    	void encode(const std::array<Vertex, N>& data) noexcept
-    	{
-    	    bind();
-    	    glBufferData(buf_t, N * sizeof(Vertex), &data, MemoryOption);
-    	    unbind();
-    	}
-
-	template <std::size_t N, typename Lambda>
-    	constexpr void encode(const Lambda& l)
-    	{
-    	    encode(std::forward<std::array<Vertex, N>>(
-    		map_indicies(l, std::make_index_sequence<N>())));
-    	}
-
-	template <std::size_t N, typename Lambda>
-	constexpr void encode(Lambda&& l) { encode<N>(l); }
-    private:
+    	constexpr void encode(const std::array<Vertex, N>& arr) noexcept
+    	{ buf_.encode(arr); }
 	
+	constexpr void encode(const std::vector<Vertex>& vec) noexcept
+    	{ buf_.encode(vec); }
+	
+    private:
 	template <std::size_t I, class Field>
     	constexpr void bind_field(const Field& field) const
     	{	    
@@ -121,31 +76,33 @@ namespace wrum
     	}
 
 	template <std::size_t ...Is>
-    	constexpr void bind_fields(std::index_sequence<Is...>) const noexcept
-    	{ auto __dmy = { (bind_field<Is>(std::get<Is>(fields_)), 0)... }; }
-	
-    public:
+    	constexpr void bind_fields(std::index_sequence<Is...>) const
+    	{ auto dmy = { (bind_field<Is>(std::get<Is>(fields_)), 0)... }; }
 
-	void use()
+	template <std::size_t ...Is>
+	constexpr void disable_fields(std::index_sequence<Is...>) const
 	{
-	    bind();
+	    auto dmy0 = {
+		(glDisableVertexAttribArray(std::get<Is>(fields_).location()), 0)...
+	    };
+	}
+    public:
+	constexpr void bind()
+	{
+	    buf_.bind();
 	    bind_fields(std::make_index_sequence<field_count_>());
 	}
 
-	void unuse()
+	constexpr void unbind()
 	{
-	    unbind();
-	    unbind_fields(std::make_index_sequence<field_count_>());
+	    buf_.unbind();
+	    disable_fields(std::make_index_sequence<field_count_>());
 	}
     };
 
-    template <Memory::OptionT MemoryOption, typename ...Fields>
-    inline
-    constexpr auto makeVertexBuffer(Fields ...fields)
-    {
-	return VertexBuffer<MemoryOption,std::tuple<Fields...>>(
-	    std::make_tuple(fields...));
-    }
+    template <BufferMemory Memory, typename ...Fields>    
+    extern constexpr auto make_vertex_buffer(Fields ...fields) noexcept
+    { return VertexBuffer<Memory, Fields...>(std::make_tuple(fields...)); }
 }
 
 #endif /* wrum_VertexBuffer_hpp */

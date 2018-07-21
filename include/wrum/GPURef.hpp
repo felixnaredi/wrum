@@ -22,18 +22,19 @@ namespace wrum
 	    : gid_(T::create_gpu_ref(args...)),
 	      moved_(false)
 	{ }
+	
 	constexpr GPURef(GPURef&& other) noexcept
 	    : gid_(other.gid_),
 	      moved_(false)
 	{ other.moved_ = true; }
-
+	
+	GPURef(GPURef& r) = delete;
+	
 	~GPURef()
 	{
 	    if(moved_) { return; }
 	    T::release_gpu_ref(*this);
-	}
-	
-	GPURef(GPURef& r) = delete;	
+	}       	
 
 	constexpr operator UInt() const { return gid_; }
 	constexpr operator const UInt*() const { return &gid_; }

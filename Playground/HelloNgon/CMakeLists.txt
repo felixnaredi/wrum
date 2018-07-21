@@ -4,7 +4,7 @@
 # Date: 2018-07-18 02:54:18 +0200
 #
 
-cmake_minimum_required(VERSION 2.8.9)
+cmake_minimum_required(VERSION 3.10.3)
 project(hello-triangle)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -14,6 +14,8 @@ set(CMAKE_CXX_COMPILER clang++)
 
 include_directories(../../include)
 file(GLOB SOURCES "*.cpp")
+
+add_definitions(-DPLG_SHADER_DIR="../shaders/")
 
 add_executable(run ${SOURCES})
 # target_compile_options(run PUBLIC -O3)

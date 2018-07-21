@@ -74,13 +74,9 @@ namespace wrum
 	auto link(const Validator& validate, const Shaders& ...shs)
 	{
 	    Program prg;
-	    if(true) {
-		auto __dmy = { (glAttachShader(prg.ref(), shs.ref()), 0)... };
-	    }
+	    const auto dmy0 = { (glAttachShader(prg.ref(), shs.ref()), 0)... };
 	    glLinkProgram(prg.ref());
-	    if(true) {
-		auto __dmy = { (glDetachShader(prg.ref(), shs.ref()), 0)... };
-	    }
+	    const auto dmy1 = { (glDetachShader(prg.ref(), shs.ref()), 0)... };
 	    validate(prg);
 	    return std::move(prg);
 	}
