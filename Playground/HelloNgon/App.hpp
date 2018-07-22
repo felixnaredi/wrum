@@ -4,8 +4,8 @@
 // Date: 2018-07-21 23:45:27 +0200
 //
 
-#ifndef app_hpp
-#define app_hpp
+#ifndef plg_App_hpp
+#define plg_App_hpp
 
 #include <functional>
 #include <vector>
@@ -25,8 +25,8 @@ namespace plg
     
     template <typename Lambda>
     inline
-    void set_key_callback(Lambda&& l) noexcept
+    void set_key_down_callback(const Lambda&& l) noexcept
     { key_down_callback = l; }
 }
 
-#endif /* app_hpp */
+#endif /* plg_App_hpp */

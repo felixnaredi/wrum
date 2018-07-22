@@ -12,7 +12,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "app.hpp"
+#include "App.hpp"
 
 namespace plg
 {

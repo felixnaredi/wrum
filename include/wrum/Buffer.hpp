@@ -69,7 +69,7 @@ namespace wrum
 
 	template <typename T>
 	constexpr void encode(const std::vector<T>& vec) noexcept
-    	{ encode(vec.data(), vec.size() * sizeof(T)); }
+	{ encode(vec.data(), vec.size() * sizeof(T)); }
     };
 }
 

@@ -4,6 +4,9 @@
 // Date: 2018-07-21 21:03:45 +0200
 //
 
+#ifndef wrum_FunkyArray_hpp
+#define wrum_FunkyArray_hpp
+
 namespace wrum
 {
     template <typename T, std::size_t ...Is, std::size_t ...Js>
@@ -37,3 +40,5 @@ namespace wrum
     constexpr auto map_index_sequence(Lambda&& l)
     { return map_index_sequence(l, std::make_index_sequence<N>()); }
 }
+
+#endif /* wrum_FunkyArray_hpp */

@@ -12,6 +12,6 @@ out vec2 fPosition;
 		    
 void main(void)
 {
-	gl_Position = vec4(vPosition * 0.85, 0, 1);
-	fPosition = vPosition / 2;
+	gl_Position = vec4(vPosition * 0.89, 0, 1);
+	fPosition = vPosition;
 }

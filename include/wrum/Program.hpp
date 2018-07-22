@@ -19,7 +19,14 @@ namespace wrum
     class Program
     {	
 	GPURef<Program> gpu_ref_;
-	std::atomic_bool used_;	
+	std::atomic_bool used_;
+
+	auto get_iv(GLenum iv) const noexcept
+	{
+	    Int r;
+	    glGetProgramiv(gpu_ref_, iv, &r);
+	    return r;
+	}
     public:
 	static auto create_gpu_ref() noexcept
 	{ return glCreateProgram(); }
@@ -33,6 +40,9 @@ namespace wrum
 	    : gpu_ref_(std::move(other.gpu_ref_)),
 	      used_(other.used_.load())
 	{ }
+
+	bool link_status() const noexcept
+	{ return get_iv(GL_LINK_STATUS) == GL_TRUE; }	    
 
 	constexpr const auto& ref() const noexcept { return gpu_ref_; }
 	auto is_used() const noexcept { return used_.load(); }	
@@ -49,13 +59,6 @@ namespace wrum
 	    if(used_.load() == false) { return; }
 	    glUseProgram(0);
 	    used_.store(false);
-	}
-
-	auto get_iv(GLenum iv) const noexcept
-	{
-	    Int r;
-	    glGetProgramiv(gpu_ref_, iv, &r);
-	    return r;
 	}
 
 	auto log() const noexcept

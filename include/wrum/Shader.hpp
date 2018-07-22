@@ -39,6 +39,9 @@ namespace wrum
 	{ }
 
 	constexpr const auto& ref() const noexcept { return gpu_ref_; }
+
+	bool compile_status() const noexcept
+	{ return get_iv(GL_COMPILE_STATUS) == GL_TRUE; }	    
 	
 	auto log() const noexcept
 	{
