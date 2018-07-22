@@ -1,4 +1,4 @@
-// plg.cc
+// App.cpp
 //
 // Author: Felix Naredi
 // Date: 2018-07-18 18:30:19 +0200
@@ -16,9 +16,9 @@
 
 namespace plg
 {
-    GLFWwindow* window;    
+    GLFWwindow* window;
     std::function<void(int)> key_down_callback;
-    
+
     void key_callback(
 	GLFWwindow* window,
 	int key,
@@ -27,16 +27,17 @@ namespace plg
 	int mods)
     {
 	if((mods & GLFW_MOD_CONTROL) && key == GLFW_KEY_W) {
-	    glfwSetWindowShouldClose(window, GLFW_TRUE);	    
+	    glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
 	if(action == GLFW_PRESS) { key_down_callback(key); }
     }
-    
+
     void app_init()
     {
 	if(glfwInit() != GLFW_TRUE) {
 	    throw std::runtime_error("Failed to init GLFW");
 	}
+	glfwWindowHint(GLFW_SAMPLES, 4);
 	window = glfwCreateWindow(377, 377, "Window", NULL, NULL);
 	glfwMakeContextCurrent(window);
 
@@ -47,13 +48,15 @@ namespace plg
 	    throw std::runtime_error(ss.str());
 	}
 
+	glEnable(GL_MULTISAMPLE);
+
 	glfwSetKeyCallback(window, key_callback);
     }
 
     bool should_close() noexcept { return glfwWindowShouldClose(window) == GLFW_TRUE; }
     void swap_buffers() noexcept { glfwSwapBuffers(window); }
     void wait_events() noexcept { glfwWaitEvents(); }
-    
+
     const std::vector<char> read_file(const char* path)
     {
 	auto file = std::fopen(path, "rb");

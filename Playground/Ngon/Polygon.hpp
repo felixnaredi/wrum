@@ -34,7 +34,7 @@ namespace plg
 		auto sts = sh.compile_status();
 		auto& out = sts ? std::cout : std::cerr;
 		out << descr << ": ";
-		if(sts) { out << "compile succeded\n"; }
+		if(sts) { out << "compiled successfully\n"; }
 		else {
 		    out << "compile failed\n" << sh.log();
 		    throw std::runtime_error("compile failed");
@@ -47,13 +47,13 @@ namespace plg
 	    auto sts = prg.link_status();
 	    auto& out = sts ? std::cout : std::cerr;
 	    out << "Linking: ";
-	    if(sts) { out << "linking succeded\n"; }
+	    if(sts) { out << "linked successfully\n"; }
 	    else {
 		out << "linking failed\n" << prg.log();
 		throw std::runtime_error("linking failed");
 	    }
 	}
-	
+
 	static decltype(auto) make_program()
 	{
 	    wrum::Compiler compiler;
@@ -70,7 +70,7 @@ namespace plg
 		    std::forward<const char*>(
 			read_file(PLG_SHADER_DIR "sh_f.glsl").data())));
 	}
-	
+
 	std::size_t sides_;
 	VertexBuf vb_;
 	IndexBuf ib_;
@@ -82,7 +82,7 @@ namespace plg
 
 	constexpr auto indicies_count() const noexcept { return sides_ * 3; }
     public:
-	
+
 	void set_sides(const int n) noexcept
 	{
 	    if(n == sides_) { return; }
@@ -90,25 +90,24 @@ namespace plg
 		set_sides(3);
 		return;
 	    }
-	    sides_ = n;	    	    
+	    sides_ = n;
 
 	    std::vector<Vertex> vs(n + 1);
 	    auto it_v = vs.begin();
 	    *it_v = Vertex { { 0, 0 } };
 	    const auto r = (2.0 * acos(-1)) / static_cast<float>(n);
-	    for(int i = 0; i < n; ++i) {
-		*(++it_v) = Vertex { { cos(i * r), sin(i * r) } };
+	    for(int i = 0; i < n; ++i, ++it_v) {
+		*it_v = Vertex { { cos(i * r), sin(i * r) } };
 	    }
 	    vb_.encode(vs);
-	    
+
 	    const auto c = n * 3;
 	    std::vector<Index> is(c);
 	    auto it_i = is.begin();
-	    for(int i = 0; i < c - 1; ++i) {
+	    for(int i = 0; i < c - 1; ++i, ++it_i) {
 		auto m = i % 3;
 		if(m == 0) { *it_i = 0; }
 		else { *it_i = (i / 3) + m; }
-		++it_i;
 	    }
 	    *it_i = 1;
 	    ib_.encode(is);
@@ -126,7 +125,7 @@ namespace plg
 	    vb_.locate_fields(prg_);
 	    prg_.unuse();
 	    set_sides(3);
-	}	
+	}
 
 	void draw() noexcept
 	{
@@ -140,7 +139,7 @@ namespace plg
 		0);
 	    ib_.unbind();
 	    vb_.unbind();
-	    prg_.unuse();	 
+	    prg_.unuse();
 	}
     };
 
