@@ -94,7 +94,7 @@ namespace plg
 
 	    std::vector<Vertex> vs(n + 1);
 	    auto it_v = vs.begin();
-	    *it_v = Vertex { { 0, 0 } };
+	    *it_v++ = Vertex { { 0, 0 } };
 	    const auto r = (2.0 * acos(-1)) / static_cast<float>(n);
 	    for(int i = 0; i < n; ++i, ++it_v) {
 		*it_v = Vertex { { cos(i * r), sin(i * r) } };
