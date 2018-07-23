@@ -37,7 +37,7 @@ namespace wrum
 	constexpr Buffer() noexcept : bound_(false) { }
 
 	Buffer(Self&& buf) noexcept
-	: bound_(buf.bound_.load()),
+	    : bound_(buf.bound_.load()),
 	      gpu_ref_(std::move(buf.gpu_ref_))
 	{ }
 
@@ -47,7 +47,7 @@ namespace wrum
 	    glBindBuffer(BufferT, gpu_ref_);
 	    bound_.store(true);
 	}
-	
+
     	constexpr void unbind() noexcept
 	{
 	    if(bound_.load() == false) { return; }

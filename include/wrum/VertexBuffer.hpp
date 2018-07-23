@@ -25,41 +25,41 @@ namespace wrum
 	const static auto field_count_ = sizeof...(Fields);
 
 	Buffer<Memory, GL_ARRAY_BUFFER> buf_;
-	Tuple fields_;	
+	Tuple fields_;
 
 	template <std::size_t ...Is>
 	constexpr void locate_fields(
 	    const Program& prg,
 	    std::index_sequence<Is...>)
-	noexcept	
+	noexcept
 	{ auto dmy0 = { (std::get<Is>(fields_).locate(prg), 0)... }; }
-	
-    public:	
+
+    public:
 	using Vertex = std::tuple<typename Fields::Attrib...>;
-	
+
 	constexpr VertexBuffer(Tuple fields) noexcept
 	    : fields_(fields)
 	{ }
 
 	constexpr VertexBuffer(Self&& vb) noexcept
-	: buf_(std::move(vb.buf_)),
-	    fields_(std::move(vb.fields_))
-	    { }
+	    : buf_(std::move(vb.buf_)),
+	      fields_(std::move(vb.fields_))
+	{ }
 
 	constexpr void locate_fields(const Program& prg)
 	{ locate_fields(prg, std::make_index_sequence<field_count_>()); }
-		
+
 	template <std::size_t N>
     	constexpr void encode(const std::array<Vertex, N>& arr) noexcept
     	{ buf_.encode(arr); }
-	
+
 	constexpr void encode(const std::vector<Vertex>& vec) noexcept
     	{ buf_.encode(vec); }
-	
+
     private:
 	template <std::size_t I, class Field>
     	constexpr void bind_field(const Field& field) const
-    	{	    
+    	{
     	    glEnableVertexAttribArray(field.location());
     	    Vertex v;
     	    // Tuples (at least on my system) are packed
@@ -77,7 +77,7 @@ namespace wrum
 
 	template <std::size_t ...Is>
     	constexpr void bind_fields(std::index_sequence<Is...>) const
-    	{ auto dmy = { (bind_field<Is>(std::get<Is>(fields_)), 0)... }; }
+    	{ auto dmy0 = { (bind_field<Is>(std::get<Is>(fields_)), 0)... }; }
 
 	template <std::size_t ...Is>
 	constexpr void disable_fields(std::index_sequence<Is...>) const
@@ -100,7 +100,7 @@ namespace wrum
 	}
     };
 
-    template <BufferMemory Memory, typename ...Fields>    
+    template <BufferMemory Memory, typename ...Fields>
     extern constexpr auto make_vertex_buffer(Fields ...fields) noexcept
     { return VertexBuffer<Memory, Fields...>(std::make_tuple(fields...)); }
 }

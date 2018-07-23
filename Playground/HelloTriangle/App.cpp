@@ -1,4 +1,4 @@
-// plg.cc
+// App.cpp
 //
 // Author: Felix Naredi
 // Date: 2018-07-18 18:30:19 +0200
@@ -12,7 +12,7 @@
 
 namespace plg
 {
-    GLFWwindow* window;    
+    GLFWwindow* window;
 
     void key_callback(
 	GLFWwindow* window,
@@ -22,10 +22,10 @@ namespace plg
 	int mods)
     {
 	if((mods & GLFW_MOD_CONTROL) && key == GLFW_KEY_W) {
-	    glfwSetWindowShouldClose(window, GLFW_TRUE);	    
+	    glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
     }
-    
+
     void app_init()
     {
 	if(glfwInit() != GLFW_TRUE) {

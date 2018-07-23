@@ -24,17 +24,8 @@ namespace wrum
 	Dynamic = GL_DYNAMIC_DRAW,
 	Static = GL_STATIC_DRAW,
     };
-    
-    struct Memory
-    {
-	using Option = GLenum;
-	
-	const static auto Stream = GL_STREAM_DRAW;
-	const static auto Dynamic = GL_DYNAMIC_DRAW;
-	const static auto Static = GL_STATIC_DRAW;	
-    };
 
-    template <typename Prim>
+    template <typename T>
     struct TypeOption { };
 
     template <>

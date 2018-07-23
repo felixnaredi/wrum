@@ -91,6 +91,7 @@ namespace plg
 		return;
 	    }
 	    sides_ = n;
+	    std::cout << n << '\n';
 
 	    std::vector<Vertex> vs(n + 1);
 	    auto it_v = vs.begin();
