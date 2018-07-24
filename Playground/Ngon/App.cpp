@@ -8,29 +8,19 @@
 #include <stdexcept>
 #include <sstream>
 #include <vector>
+#include <map>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include "App.hpp"
+#include "Keyboard.hpp"
 
 namespace plg
 {
     GLFWwindow* window;
-    std::function<void(int)> key_down_callback;
 
-    void key_callback(
-	GLFWwindow* window,
-	int key,
-	int scancode,
-	int action,
-	int mods)
-    {
-	if((mods & GLFW_MOD_CONTROL) && key == GLFW_KEY_W) {
-	    glfwSetWindowShouldClose(window, GLFW_TRUE);
-	}
-	if(action == GLFW_PRESS) { key_down_callback(key); }
-    }
+    std::map<const GLFWwindow*, Keyboard*> Keyboard::window_connections_;
 
     void app_init()
     {
@@ -49,13 +39,19 @@ namespace plg
 	}
 
 	glEnable(GL_MULTISAMPLE);
+    }
 
-	glfwSetKeyCallback(window, key_callback);
+    void quit() noexcept
+    {
+	glfwSetWindowShouldClose(window, GLFW_TRUE);
+	// glfwTerminate();
     }
 
     bool should_close() noexcept { return glfwWindowShouldClose(window) == GLFW_TRUE; }
     void swap_buffers() noexcept { glfwSwapBuffers(window); }
     void wait_events() noexcept { glfwWaitEvents(); }
+    void poll_events() noexcept { glfwPollEvents(); }
+    void connect(Keyboard& kb) noexcept { kb.establish_window_connection(window); }
 
     const std::vector<char> read_file(const char* path)
     {
@@ -77,5 +73,4 @@ namespace plg
 	std::fclose(file);
 	return cs;
     }
-
 }

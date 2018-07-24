@@ -16,10 +16,23 @@
 
 namespace wrum
 {
-    template <BufferMemory Memory, Option BufferT>
+    enum class BufferMemory
+    {
+	Stream = GL_STREAM_DRAW,
+	Dynamic = GL_DYNAMIC_DRAW,
+	Static = GL_STATIC_DRAW,
+    };
+
+    enum class BufferType
+    {
+	Array = GL_ARRAY_BUFFER,
+	ElementArray = GL_ELEMENT_ARRAY_BUFFER,
+    };
+
+    template <BufferMemory Memory, BufferType BufT>
     class Buffer
     {
-	using Self = Buffer<Memory, BufferT>;
+	using Self = Buffer<Memory, BufT>;
 
 	GPURef<Self> gpu_ref_;
 	std::atomic_bool bound_;
@@ -44,14 +57,14 @@ namespace wrum
 	constexpr void bind() noexcept
 	{
 	    if(bound_.load()) { return; }
-	    glBindBuffer(BufferT, gpu_ref_);
+	    glBindBuffer(static_cast<Option>(BufT), gpu_ref_);
 	    bound_.store(true);
 	}
 
     	constexpr void unbind() noexcept
 	{
 	    if(bound_.load() == false) { return; }
-	    glBindBuffer(BufferT, 0);
+	    glBindBuffer(static_cast<Option>(BufT), 0);
 	    bound_.store(false);
 	}
 
@@ -59,7 +72,11 @@ namespace wrum
 	constexpr void encode(const T* data, std::size_t size) noexcept
 	{
 	    bind();
-	    glBufferData(BufferT, size, data, static_cast<Option>(Memory));
+	    glBufferData(
+		static_cast<Option>(BufT),
+		size,
+		data,
+		static_cast<Option>(Memory));
 	    unbind();
 	}
 

@@ -19,24 +19,39 @@ int main(int argc, char** argv)
 	return 1;
     }
 
-    auto polygon = plg::make_polygon();
+    plg::Keyboard kb;
+    plg::connect(kb);
+    kb.set_key_down(GLFW_KEY_Q, [] { plg::quit(); });
 
-    plg::set_key_down_callback([&polygon](auto key) {
-	if(key == GLFW_KEY_UP) { polygon.incr_sides(1); }
-	if(key == GLFW_KEY_DOWN) { polygon.incr_sides(-1); }
-    });
+    auto polygon = plg::make_polygon();
+    auto incr_polygon_sides = [&polygon](int n) {
+	return [&polygon, n] {
+	    polygon.incr_sides(n);
+	    std::cout << "Sides: " << polygon.sides() << '\n';
+	};
+    };
+
+    kb.set_key_down(GLFW_KEY_UP, incr_polygon_sides(1));
+    kb.set_key_hold(GLFW_KEY_UP, incr_polygon_sides(1));
+    kb.set_key_down(GLFW_KEY_DOWN, incr_polygon_sides(-1));
+    kb.set_key_hold(GLFW_KEY_DOWN, incr_polygon_sides(-1));
+
     std::cout << "--------------------------------\n"
-	      << "Ctrl+W : Close window\n"
-	      << "Up key : Increase sides of polygon\n"
-	      << "Down key : Decrease sides of polygon\n";
+    	      << "Q    : Quit program\n"
+    	      << "Up   : Increase sides of polygon\n"
+    	      << "Down : Decrease sides of polygon\n"
+    	      << '\n';
 
     glClearColor(0.1, 0.2, 0.2, 1.0);
 
     while(plg::should_close() == false) {
-	glClear(GL_COLOR_BUFFER_BIT);
-	polygon.draw();
+	if(polygon.is_dirty()) {
+	    glClear(GL_COLOR_BUFFER_BIT);
+	    polygon.draw();
+	}
     	plg::swap_buffers();
-    	plg::wait_events();
+    	plg::poll_events();
+	kb.update();
     }
 
     return 0;

@@ -24,7 +24,7 @@ namespace wrum
 
 	const static auto field_count_ = sizeof...(Fields);
 
-	Buffer<Memory, GL_ARRAY_BUFFER> buf_;
+	Buffer<Memory, BufferType::Array> buf_;
 	Tuple fields_;
 
 	template <std::size_t ...Is>
@@ -101,7 +101,8 @@ namespace wrum
     };
 
     template <BufferMemory Memory, typename ...Fields>
-    extern constexpr auto make_vertex_buffer(Fields ...fields) noexcept
+    extern
+    constexpr auto make_vertex_buffer(Fields ...fields) noexcept
     { return VertexBuffer<Memory, Fields...>(std::make_tuple(fields...)); }
 }
 

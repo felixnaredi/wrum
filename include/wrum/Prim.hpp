@@ -18,13 +18,6 @@ namespace wrum
     using Float = GLfloat;
     using Option = GLenum;
 
-    enum class BufferMemory
-    {
-	Stream = GL_STREAM_DRAW,
-	Dynamic = GL_DYNAMIC_DRAW,
-	Static = GL_STATIC_DRAW,
-    };
-
     template <typename T>
     struct TypeOption { };
 

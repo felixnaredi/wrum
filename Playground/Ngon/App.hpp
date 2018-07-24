@@ -13,20 +13,18 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "Keyboard.hpp"
+
 namespace plg
 {
-    extern std::function<void(int)> key_down_callback;
-
     void app_init();
+    void quit() noexcept;
     bool should_close() noexcept;
     void swap_buffers() noexcept;
     void wait_events() noexcept;
+    void poll_events() noexcept;
+    void connect(Keyboard& kb) noexcept;
     const std::vector<char> read_file(const char* path);
-
-    template <typename Lambda>
-    inline
-    void set_key_down_callback(const Lambda&& l) noexcept
-    { key_down_callback = l; }
 }
 
 #endif /* plg_App_hpp */

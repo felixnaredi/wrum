@@ -91,7 +91,6 @@ namespace plg
 		return;
 	    }
 	    sides_ = n;
-	    std::cout << n << '\n';
 
 	    std::vector<Vertex> vs(n + 1);
 	    auto it_v = vs.begin();
@@ -112,6 +111,8 @@ namespace plg
 	    }
 	    *it_i = 1;
 	    ib_.encode(is);
+
+	    dirty_ = 3;
 	}
 
 	void incr_sides(int n) noexcept { set_sides(sides_ + n); }
@@ -128,6 +129,9 @@ namespace plg
 	    set_sides(3);
 	}
 
+	constexpr auto sides() const noexcept { return sides_; }
+	constexpr bool is_dirty() const noexcept { return dirty_; }
+
 	void draw() noexcept
 	{
 	    prg_.use();
@@ -141,16 +145,20 @@ namespace plg
 	    ib_.unbind();
 	    vb_.unbind();
 	    prg_.unuse();
+
+	    dirty_ >>= 1;
 	}
     };
 
     auto make_polygon()
     {
 	using namespace wrum;
+	using IndexBuf = Buffer<BufferMemory::Dynamic, BufferType::ElementArray>;
+
 	auto vb = make_vertex_buffer<BufferMemory::Dynamic>(
 	    LabelField<Attrib::Float2>("vPosition"));
-	Buffer<BufferMemory::Dynamic, GL_ELEMENT_ARRAY_BUFFER> ib;
-	return Polygon<decltype(vb), decltype(ib)>(std::move(vb), std::move(ib));
+
+	return Polygon<decltype(vb), IndexBuf>(std::move(vb), IndexBuf());
     }
 }
 
