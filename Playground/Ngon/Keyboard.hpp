@@ -37,13 +37,13 @@ namespace plg
 	KeyMap key_down_map_;
 	KeyMap key_up_map_;
 	KeyMap key_hold_map_;
-	std::list<Key> hold_keys_;
+	std::list<KeyCode> hold_keys_;
 	bool hold_on_;
 	bool hold_active_;
 	Clock::time_point hold_check_time_;
 	Millisec hold_dur_;
 
-	void press(KeyCode key) noexcept
+	void press(KeyCode key)
 	{
 	    call(key_down_map_, key);
 	    hold_on_ = hold_keys_.empty();
@@ -51,7 +51,7 @@ namespace plg
 	    hold_keys_.push_back(key);
 	}
 
-	void release(KeyCode key) noexcept
+	void release(KeyCode key)
 	{
 	    call(key_up_map_, key);
 	    hold_keys_.remove(key);
@@ -87,24 +87,24 @@ namespace plg
 	{ }
 
 	template <typename Lambda>
-	void set_key_down(KeyCode k, const Lambda l) noexcept
+	void set_key_down(KeyCode k, const Lambda l)
 	{ key_down_map_[k] = l; }
 
 	template <typename Lambda>
-	void set_key_up(KeyCode k, const Lambda l) noexcept
+	void set_key_up(KeyCode k, const Lambda l)
 	{ key_up_map_[k] = l; }
 
 	template <typename Lambda>
-	void set_key_hold(KeyCode k, const Lambda l) noexcept
+	void set_key_hold(KeyCode k, const Lambda l)
 	{ key_hold_map_[k] = l; }
 
-	void establish_window_connection(GLFWwindow* win) noexcept
+	void establish_window_connection(GLFWwindow* win)
 	{
 	    glfwSetKeyCallback(win, window_key_callback);
 	    window_connections_[win] = this;
 	}
 
-	void update() noexcept
+	void update()
 	{
 	    if(hold_on_ == false) { return; }
 
@@ -127,6 +127,8 @@ namespace plg
 	    }
 	}
     };
+
+    std::map<const GLFWwindow*, Keyboard*> Keyboard::window_connections_;
 }
 
 #endif /* plg_Keyboard_hpp */

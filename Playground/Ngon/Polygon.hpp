@@ -83,7 +83,7 @@ namespace plg
 	constexpr auto indicies_count() const noexcept { return sides_ * 3; }
     public:
 
-	void set_sides(const int n) noexcept
+	void set_sides(const int n)
 	{
 	    if(n == sides_) { return; }
 	    if(n < 3) {
@@ -132,7 +132,7 @@ namespace plg
 	constexpr auto sides() const noexcept { return sides_; }
 	constexpr bool is_dirty() const noexcept { return dirty_; }
 
-	void draw() noexcept
+	void draw()
 	{
 	    prg_.use();
 	    vb_.bind();

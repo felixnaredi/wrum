@@ -81,7 +81,7 @@ namespace wrum
 	}
 
 	template <typename T, std::size_t N>
-	constexpr void encode(const std::array<T, N>& arr)
+	constexpr void encode(const std::array<T, N>& arr) noexcept
 	{ encode(arr.data(), N * sizeof(T)); }
 
 	template <typename T>
